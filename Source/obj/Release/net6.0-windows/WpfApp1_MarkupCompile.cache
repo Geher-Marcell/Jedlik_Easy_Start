@@ -4,11 +4,11 @@
 winexe
 C#
 .cs
-Z:\PROG\ProjectMunka\Jedlik_Easy_Start\Source\obj\Debug\net6.0-windows\
+Z:\PROG\ProjectMunka\Jedlik_Easy_Start\Source\obj\Release\net6.0-windows\
 WpfApp1
 none
 false
-TRACE;DEBUG;NET;NET6_0;NETCOREAPP
+TRACE;RELEASE;NET;NET6_0;NETCOREAPP
 Z:\PROG\ProjectMunka\Jedlik_Easy_Start\Source\App.xaml
 11407045341
 
