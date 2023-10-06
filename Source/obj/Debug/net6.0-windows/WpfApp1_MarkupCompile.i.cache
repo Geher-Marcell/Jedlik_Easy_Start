@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-Z:\PROG\CS\WpfApp1\obj\Debug\net6.0-windows\
+Z:\PROG\ProjectMunka\Jedlik_Easy_Start\Source\obj\Debug\net6.0-windows\
 WpfApp1
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
-Z:\PROG\CS\WpfApp1\App.xaml
+Z:\PROG\ProjectMunka\Jedlik_Easy_Start\Source\App.xaml
 11407045341
 
 5-1303815099
 194726069201
 MainWindow.xaml;
 
-True
+False
 
