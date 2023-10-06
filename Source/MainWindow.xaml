@@ -17,11 +17,5 @@
 
         <Button x:Name="btn_background" Content="↑" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,126,0,0" BorderBrush="#FF373737" Width="20" Click="btn_changeBg_Click" FontWeight="Bold" />
         <Label HorizontalAlignment="Left" VerticalAlignment="Top" Margin="33,124,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Kép feltöltése</Label>
-
-        <Image Height="40" VerticalAlignment="Bottom" Stretch="Fill" Margin="10,0,10,0">
-            <Image.Source>
-                <BitmapImage DecodePixelWidth="200" UriSource="C:\Users\geher.marcell\Downloads\vicci mágus.png"></BitmapImage>
-            </Image.Source>
-        </Image>
     </Grid>
 </Window>

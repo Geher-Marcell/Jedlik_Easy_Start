@@ -157,5 +157,13 @@ namespace WpfApp1
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path,
                 SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
         }
+
+        /*
+         <Image Height="40" VerticalAlignment="Bottom" Stretch="Fill" Margin="10,0,10,0">
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="200" UriSource="C:\Users\geher.marcell\Downloads\vicci mágus.png"></BitmapImage>
+            </Image.Source>
+        </Image>
+        */
     }
 }
