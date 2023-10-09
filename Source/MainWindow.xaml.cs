@@ -37,7 +37,18 @@ namespace WpfApp1
         public const UInt32 SPI_SETMOUSE = 0x0004;
 
         #endregion
-            
+
+        #region wallpaper hook
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern Int32 SystemParametersInfo(
+        UInt32 action, UInt32 uParam, String vParam, UInt32 winIni);
+
+        private static readonly UInt32 SPI_SETDESKWALLPAPER = 0x14;
+        private static readonly UInt32 SPIF_UPDATEINIFILE = 0x01;
+        private static readonly UInt32 SPIF_SENDWININICHANGE = 0x02;
+
+        #endregion
+
         public MainWindow()
         {
             InitializeComponent();
@@ -143,14 +154,6 @@ namespace WpfApp1
             }
                 
         }
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern Int32 SystemParametersInfo(
-        UInt32 action, UInt32 uParam, String vParam, UInt32 winIni);
-
-        private static readonly UInt32 SPI_SETDESKWALLPAPER = 0x14;
-        private static readonly UInt32 SPIF_UPDATEINIFILE = 0x01;
-        private static readonly UInt32 SPIF_SENDWININICHANGE = 0x02;
 
         public static void SetWallpaper(String path)
         {
