@@ -3,8 +3,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
 namespace WpfApp1
@@ -38,7 +40,7 @@ namespace WpfApp1
 
         #endregion
 
-        #region wallpaper hook
+        #region WallpaperHook
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern Int32 SystemParametersInfo(
         UInt32 action, UInt32 uParam, String vParam, UInt32 winIni);
@@ -47,6 +49,14 @@ namespace WpfApp1
         private static readonly UInt32 SPIF_UPDATEINIFILE = 0x01;
         private static readonly UInt32 SPIF_SENDWININICHANGE = 0x02;
 
+        #endregion
+
+        #region TaskbarHook
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+        internal static extern IntPtr LoadLibrary(string lpLibFileName);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+        internal static extern int LoadString(IntPtr hInstance, uint wID, StringBuilder lpBuffer, int nBufferMax);
         #endregion
 
         public MainWindow()
@@ -136,13 +146,11 @@ namespace WpfApp1
 
                 if (waitForExit) p.WaitForExit();
             }
-            catch (Exception Ex)
-            {
-                //MessageBox.Show(Ex.Message);
-            }
+            catch{}
         }
         #endregion
 
+        #region Background
         private void btn_changeBg_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -160,6 +168,88 @@ namespace WpfApp1
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path,
                 SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
         }
+        #endregion
+
+        #region unpinning
+
+        string currentUsername = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+        string taskbarRegKey = @"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband\";
+        string taskbarPath1 = @"C:\Users\";
+        string taskbarPath2 = @"\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\";
+
+        public bool PinUnpinTaskbar(string filePath, bool pin)
+        {
+            if (!File.Exists(filePath)) throw new FileNotFoundException(filePath);
+            int MAX_PATH = 255;
+            var actionIndex = pin ? 5386 : 5387; // 5386 is the DLL index for"Pin to Tas&kbar", ref. http://www.win7dll.info/shell32_dll.html
+                                                 //uncomment the following line to pin to start instead
+                                                 //actionIndex = pin ? 51201 : 51394;
+            StringBuilder szPinToStartLocalized = new StringBuilder(MAX_PATH);
+            IntPtr hShell32 = LoadLibrary("Shell32.dll");
+            LoadString(hShell32, (uint)actionIndex, szPinToStartLocalized, MAX_PATH);
+            string localizedVerb = szPinToStartLocalized.ToString();
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string path = Path.GetDirectoryName(filePath);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            string fileName = Path.GetFileName(filePath);
+
+            // create the shell application object
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8604 // Possible null reference argument.
+            dynamic shellApplication = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"));
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            dynamic directory = shellApplication.NameSpace(path);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            dynamic link = directory.ParseName(fileName);
+
+            dynamic verbs = link.Verbs();
+            for (int i = 0; i < verbs.Count(); i++)
+            {
+                dynamic verb = verbs.Item(i);
+                if (verb.Name.Equals(localizedVerb))
+                {
+                    verb.DoIt();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        void btn_unpinTaskbar_Click(object sender, EventArgs e)
+        {
+            string taskbarPath = taskbarPath1 + currentUsername.Split(@"\")[1] + taskbarPath2;
+
+            /*
+            var files = Directory.GetFiles(taskbarPath);
+            string text = "";
+
+            foreach ( var file in files )
+            {
+                text += file.ToString() + "\n";
+            }
+
+            ((TextBlock)FindName("DebugText")).Text = text;
+            */
+
+            try
+            {
+                PinUnpinTaskbar(taskbarPath + "Microsoft Edge.lnk", false);
+            }catch{}
+
+            var process = Process.GetProcessesByName("explorer")[0];
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            var path = process.MainModule.FileName;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            process.Kill();
+#pragma warning disable CS8604 // Possible null reference argument.
+            Process.Start(path);
+#pragma warning restore CS8604 // Possible null reference argument.
+        }
+
+        #endregion
 
         /*
          <Image Height="40" VerticalAlignment="Bottom" Stretch="Fill" Margin="10,0,10,0">
@@ -169,4 +259,4 @@ namespace WpfApp1
         </Image>
         */
     }
-}
+    }
