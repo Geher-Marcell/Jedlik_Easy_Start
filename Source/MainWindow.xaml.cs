@@ -261,10 +261,20 @@ namespace WpfApp1
             ToggleNewsVisibility(false);
             ToggleTaskviewVisibility(false);
 
-            var process = Process.GetProcessesByName("explorer")[0];
-            var path = process.MainModule.FileName;
-            process.Kill();
-            Process.Start(path);
+            foreach (Process p in Process.GetProcesses())
+            {
+                try
+                {
+                    if (p.MainModule.FileName.ToLower().EndsWith(":\\windows\\explorer.exe"))
+                    {
+                        p.Kill();
+                        break;
+                    }
+                }
+                catch
+                { }
+            }
+            Process.Start("explorer.exe");
         }
 
         #endregion
