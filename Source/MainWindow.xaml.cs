@@ -91,9 +91,7 @@ namespace WpfApp1
         {
             CheckBox box = (CheckBox) sender;
 
-#pragma warning disable CS8629 // Nullable value type may be null.
             ToggleMouseAccel((bool)box.IsChecked);
-#pragma warning restore CS8629 // Nullable value type may be null.
         }
 
         #endregion
@@ -116,10 +114,8 @@ namespace WpfApp1
         private void cb_DarkMode_Checked(object sender, RoutedEventArgs e)
         {
             CheckBox box = (CheckBox)sender;
-
-            #pragma warning disable CS8629 // Nullable value type may be null.
+            
             SetLightTheme((bool)box.IsChecked);
-            #pragma warning restore CS8629 // Nullable value type may be null.
         }
         #endregion
 
@@ -170,12 +166,34 @@ namespace WpfApp1
         }
         #endregion
 
-        #region unpinning
+        #region Taskbar
 
         string currentUsername = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
         string taskbarRegKey = @"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband\";
         string taskbarPath1 = @"C:\Users\";
         string taskbarPath2 = @"\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\";
+
+        string searchboxRegKey = @"Software\Microsoft\Windows\CurrentVersion\Search";
+        string newsRegKey = @"Software\Microsoft\Windows\CurrentVersion\Feeds";
+        string taskviewRegKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced";
+
+        public void ToggleSeachBoxVisibility(bool b)
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(searchboxRegKey, true);
+            key?.SetValue("SearchboxTaskbarMode", b ? 2 : 0, RegistryValueKind.DWord);
+        }
+
+        public void ToggleNewsVisibility(bool b)
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(newsRegKey, true);
+            key?.SetValue("ShellFeedsTaskbarViewMode", b ? 0 : 2, RegistryValueKind.DWord);
+        }
+
+        public void ToggleTaskviewVisibility(bool b)
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(taskviewRegKey, true);
+            key?.SetValue("ShowTaskViewButton", b ? 1 : 0, RegistryValueKind.DWord);
+        }
 
         public bool PinUnpinTaskbar(string filePath, bool pin)
         {
@@ -218,7 +236,7 @@ namespace WpfApp1
             return false;
         }
 
-        void btn_unpinTaskbar_Click(object sender, EventArgs e)
+        void btn_taskbar_Click(object sender, EventArgs e)
         {
             string taskbarPath = taskbarPath1 + currentUsername.Split(@"\")[1] + taskbarPath2;
 
@@ -239,24 +257,16 @@ namespace WpfApp1
                 PinUnpinTaskbar(taskbarPath + "Microsoft Edge.lnk", false);
             }catch{}
 
+            ToggleSeachBoxVisibility(false);
+            ToggleNewsVisibility(false);
+            ToggleTaskviewVisibility(false);
+
             var process = Process.GetProcessesByName("explorer")[0];
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var path = process.MainModule.FileName;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
             process.Kill();
-#pragma warning disable CS8604 // Possible null reference argument.
             Process.Start(path);
-#pragma warning restore CS8604 // Possible null reference argument.
         }
 
         #endregion
-
-        /*
-         <Image Height="40" VerticalAlignment="Bottom" Stretch="Fill" Margin="10,0,10,0">
-            <Image.Source>
-                <BitmapImage DecodePixelWidth="200" UriSource="C:\Users\geher.marcell\Downloads\vicci mágus.png"></BitmapImage>
-            </Image.Source>
-        </Image>
-        */
     }
-    }
+}
